@@ -103,11 +103,11 @@ Vector2D operator*(Vector2D &&p1,double k) { return p1*k; }
 Vector2D operator/(Vector2D &&p1,double k) { return p1/k; }
 #endif
 
-double Vector2D::magnitude(void) //2D向量模运算
+double Vector2D::magnitude(void) //2D向量幅度
 {
 	return sqrt(x*x+y*y);
 }
-double Vector2D::norm(void) //2D向量模运算
+double Vector2D::norm(void) //2D向量归一化
 {
 	double mag=magnitude();
 	if (fabs(mag)>Eps)
@@ -117,7 +117,7 @@ double Vector2D::norm(void) //2D向量模运算
 	}
 	return mag;
 }
-double Vector2D::distance(Vector2D &p1) //2D向量模运算
+double Vector2D::distance(Vector2D &p1) //2D向量距离
 {
 	Vector2D p=p1-*this;
 	return p.norm();
@@ -216,11 +216,11 @@ Vector3D operator*(Vector3D &&p1,double k) { return p1*k; }
 Vector3D operator/(Vector3D &&p1,double k) { return p1/k; }
 #endif
 
-double Vector3D::magnitude(void) //3D向量模运算
+double Vector3D::magnitude(void) //3D向量幅度
 {
 	return sqrt(x*x+y*y+z*z);
 }
-double Vector3D::norm(void) //3D向量模运算
+double Vector3D::norm(void) //3D向量归一化
 {
 	double mag=magnitude();
 	if (fabs(mag)>Eps)
@@ -231,7 +231,7 @@ double Vector3D::norm(void) //3D向量模运算
 	}
 	return mag;
 }
-double Vector3D::distance(Vector3D &p1) //3D向量模运算
+double Vector3D::distance(Vector3D &p1) //3D向量距离
 {
 	Vector3D p=p1-*this;
 	return p.norm();
@@ -632,19 +632,51 @@ Vector2D rotateToVector2D(Vector2D &k,Vector2D &c,double r)
 	return ret;
 }
 
-//3D旋转:z-x-y输入点和欧拉角,原位操作
+//////////////////////////////////////////////////////////////////////////
+//3D旋转:输入点和欧拉角单个角
+Vector3D rotate3D_euler_x(Vector3D &p,double ang)//弧度制
+{
+	double sa=sin(ang);
+	double ca=cos(ang);
+	return Vector3D(
+		p.x,
+		p.y*ca - p.z*sa,
+		p.y*sa + p.z*ca
+	);
+}
+Vector3D rotate3D_euler_y(Vector3D &p,double ang)//弧度制
+{
+	double sa=sin(ang);
+	double ca=cos(ang);
+	return Vector3D(
+		p.x*ca + p.z*sa,
+		p.y,
+		-p.x*sa + p.z*ca
+	);
+}
+Vector3D rotate3D_euler_z(Vector3D &p,double ang)//弧度制
+{
+	double sa=sin(ang);
+	double ca=cos(ang);
+	return Vector3D(
+		p.x*ca - p.y*sa,
+		p.x*sa + p.y*ca,
+		p.z
+	);
+}
+//3D旋转:z-x-y内旋 输入点和欧拉角
 Vector3D rotate3D_euler_zxy(Vector3D &p,Vector3D &euler)//弧度制
 {
-	double sa=sin(euler.x);
-	double sb=sin(euler.y);
-	double sr=sin(euler.z);
-	double ca=cos(euler.x);
-	double cb=cos(euler.y);
-	double cr=cos(euler.z);
+	double sx=sin(euler.x);
+	double sy=sin(euler.y);
+	double sz=sin(euler.z);
+	double cx=cos(euler.x);
+	double cy=cos(euler.y);
+	double cz=cos(euler.z);
 	return Vector3D(
-		p.x*(cr*cb-sr*sa*sb	)+p.y*(-sr*ca	)+p.z*(cr*sb+sr*sa*cb	),
-		p.x*(sr*cb+cr*sa*sb	)+p.y*(ca*cr	)+p.z*(sr*sb-cr*sa*cb	),
-		p.x*(-ca*sb			)+p.y*(sa		)+p.z*(cb*ca	)
+		p.x*(cz*cy-sz*sx*sy	)+p.y*(-sz*cx	)+p.z*(cz*sy+sz*sx*cy	),
+		p.x*(sz*cy+cz*sx*sy	)+p.y*(cx*cz	)+p.z*(sz*sy-cz*sx*cy	),
+		p.x*(-cx*sy			)+p.y*(sx		)+p.z*(cy*cx	)
 	);
 }
 #ifdef USECPP11 //4.9.2以上
@@ -653,19 +685,19 @@ Vector3D rotate3D_euler_zxy(Vector3D &p,Vector3D &&euler) { return rotate3D_eule
 Vector3D rotate3D_euler_zxy(Vector3D &&p,Vector3D &euler) { return rotate3D_euler_zxy(p,euler); }
 #endif
 
-//3D旋转:z-y-x输入点和欧拉角,原位操作(航空欧拉角)
+//3D旋转:z-y-x内旋(航空欧拉角) 输入点和欧拉角
 Vector3D rotate3D_euler_zyx(Vector3D &p,Vector3D &euler)//弧度制
 {
-	double sa=sin(euler.x);
-	double sb=sin(euler.y);
-	double sr=sin(euler.z);
-	double ca=cos(euler.x);
-	double cb=cos(euler.y);
-	double cr=cos(euler.z);
+	double sx=sin(euler.x);
+	double sy=sin(euler.y);
+	double sz=sin(euler.z);
+	double cx=cos(euler.x);
+	double cy=cos(euler.y);
+	double cz=cos(euler.z);
 	return Vector3D(
-		p.x*(cr*cb	)+p.y*(-sr*ca+cr*sb*sa	)+p.z*(sr*sa+cr*sb*ca	),
-		p.x*(sr*cb	)+p.y*(ca*cr+sr*sb*sa	)+p.z*(-cr*sa+sr*sb*ca	),
-		p.x*(-sb	)+p.y*(cb*sa			)+p.z*(cb*ca			)
+		p.x*(cz*cy	)+p.y*(-sz*cx+cz*sy*sx	)+p.z*(sz*sx+cz*sy*cx	),
+		p.x*(sz*cy	)+p.y*(cx*cz+sz*sy*sx	)+p.z*(-cz*sx+sz*sy*cx	),
+		p.x*(-sy	)+p.y*(cy*sx			)+p.z*(cy*cx			)
 	);
 }
 #ifdef USECPP11 //4.9.2以上
@@ -674,28 +706,28 @@ Vector3D rotate3D_euler_zyx(Vector3D &p,Vector3D &&euler) { return rotate3D_eule
 Vector3D rotate3D_euler_zyx(Vector3D &&p,Vector3D &euler) { return rotate3D_euler_zyx(p,euler); }
 #endif
 
-//3D旋转:x-y-z输入点和欧拉角,原位操作
-Vector3D rotate3D_euler_xyz(Vector3D &p,Vector3D &euler)//弧度制
+//3D旋转:x-y-z内旋 输入点和欧拉角
+Vector3D rotate3D_euler_yxz(Vector3D &p,Vector3D &euler)//弧度制
 {
-	double sa=sin(euler.x);
-	double sb=sin(euler.y);
-	double sr=sin(euler.z);
-	double ca=cos(euler.x);
-	double cb=cos(euler.y);
-	double cr=cos(euler.z);
+	double sx=sin(euler.x);
+	double sy=sin(euler.y);
+	double sz=sin(euler.z);
+	double cx=cos(euler.x);
+	double cy=cos(euler.y);
+	double cz=cos(euler.z);
 	return Vector3D(
-		p.x*(cb*cr			)+p.y*(-cb*sr			)+p.z*(sb		),
-		p.x*(ca*sr+cr*sa*sb)+p.y*(ca*cr-sa*sb*sr	)+p.z*(-cb*sa	),
-		p.x*(sa*sr-ca*cr*sb)+p.y*(cr*sa+ca*sb*sr	)+p.z*(ca*cb	)
+		p.x*(cy*cz+sx*sy*sz )+p.y*(cz*sy*sx-cy*sz)+p.z*(cx*sy),
+		p.x*(cx*sz			)+p.y*(cx*cz		 )+p.z*(-sx	 ),
+		p.x*(cy*sx*sz-cz*sy )+p.y*(cy*cz*sx+sy*sz)+p.z*(cx*cy)
 	);
 }
 #ifdef USECPP11 //4.9.2以上
-Vector3D rotate3D_euler_xyz(Vector3D &&p,Vector3D &&euler) { return rotate3D_euler_xyz(p,euler); }
-Vector3D rotate3D_euler_xyz(Vector3D &p,Vector3D &&euler) { return rotate3D_euler_xyz(p,euler); }
-Vector3D rotate3D_euler_xyz(Vector3D &&p,Vector3D &euler) { return rotate3D_euler_xyz(p,euler); }
+Vector3D rotate3D_euler_yxz(Vector3D &&p,Vector3D &&euler) { return rotate3D_euler_yxz(p,euler); }
+Vector3D rotate3D_euler_yxz(Vector3D &p,Vector3D &&euler) { return rotate3D_euler_yxz(p,euler); }
+Vector3D rotate3D_euler_yxz(Vector3D &&p,Vector3D &euler) { return rotate3D_euler_yxz(p,euler); }
 #endif
 
-//四元数的模
+//四元数的归一化
 double QuatVec::norm(void)
 {
 	double s=sqrt(w*w+x*x+y*y+z*z);
@@ -705,27 +737,21 @@ double QuatVec::norm(void)
 	z/=s;
 	return s;
 }
-//四元数的乘法
-void operator*=(QuatVec &q1,QuatVec &q2)
+QuatVec QuatVec::inv(void) //逆，就是共轭，认为自己是单位四元数
 {
-	double w=q1.w*q2.w - q1.x*q2.x - q1.y*q2.y - q1.z*q2.z;
-	double x=q1.w*q2.x + q1.x*q2.w + q1.y*q2.z - q1.z*q2.y;
-	double y=q1.w*q2.y - q1.x*q2.z + q1.y*q2.w + q1.z*q2.x;
-	double z=q1.w*q2.z + q1.x*q2.y - q1.y*q2.x + q1.z*q2.w;
-	q1.w=w;
-	q1.x=x;
-	q1.y=y;
-	q1.z=z;
-	q1.norm();
+	QuatVec q;
+	q.w=w; q.x=-x; q.y=-y; q.z=-z;
+	return q;
 }
-#ifdef USECPP11 //4.9.2以上
-void operator*=(QuatVec &q1,QuatVec &&q2) { q1*=q2; }
-#endif
-
-QuatVec operator*(QuatVec &q1,QuatVec &q2)
+//四元数的乘法
+QuatVec operator*(QuatVec &q1,QuatVec &q2) //乘号右侧的先转，恰好与旋转矩阵一样
 {
-	QuatVec q=q1;
-	q*=q2;
+	QuatVec q;
+	q.w=q1.w*q2.w - q1.x*q2.x - q1.y*q2.y - q1.z*q2.z;
+	q.x=q1.w*q2.x + q1.x*q2.w + q1.y*q2.z - q1.z*q2.y;
+	q.y=q1.w*q2.y - q1.x*q2.z + q1.y*q2.w + q1.z*q2.x;
+	q.z=q1.w*q2.z + q1.x*q2.y - q1.y*q2.x + q1.z*q2.w;
+	q.norm();
 	return q;
 }
 #ifdef USECPP11 //4.9.2以上
@@ -753,7 +779,7 @@ void QuatVec::rot(Vector3D &p)
 	p.y=py;
 	p.z=pz;
 }
-Vector3D QuatVec::toEuler_zyx(void) //转换为欧拉角(航空欧拉角)
+Vector3D QuatVec::toEuler_zyx(void) //转换为欧拉角(内旋，航空欧拉角)
 {
 	Vector3D p;
 	p.x = atan2(2 * (w * x + z * y) , 1 - 2 * (y * y + x * x));
@@ -761,7 +787,7 @@ Vector3D QuatVec::toEuler_zyx(void) //转换为欧拉角(航空欧拉角)
 	p.z = atan2(2 * (w * z + y * x) , 1 - 2 * (y * y + z * z));
 	return p;
 }
-Vector3D QuatVec::toEuler_zxy(void) //转换为欧拉角
+Vector3D QuatVec::toEuler_zxy(void) //转换为欧拉角，内旋
 {
 	Vector3D p;
 	p.x = asin(2 * (w * x + y * z));
@@ -769,7 +795,15 @@ Vector3D QuatVec::toEuler_zxy(void) //转换为欧拉角
 	p.z = -atan2(2 * (x * y - w * z) , 1 - 2 * (x * x + z * z));
 	return p;
 }
-void QuatVec::fromEuler_zyx(Vector3D &p) //欧拉角转四元数(航空欧拉角)
+Vector3D QuatVec::toEuler_yxz(void) //转换为欧拉角，内旋
+{
+	Vector3D p;
+	p.x = -asin(2 * (y * z - w * x));
+	p.y = atan2(2 * (x * z + w * y) , 1 - 2 * (y * y + x * x));
+	p.z = atan2(2 * (x * y + w * z) , 1 - 2 * (x * x + z * z));
+	return p;
+}
+void QuatVec::fromEuler_zyx(Vector3D &p) //欧拉角转四元数内旋(航空欧拉角)
 {
 	double cx = cos(p.x/2);
 	double sx = sin(p.x/2);
@@ -785,6 +819,38 @@ void QuatVec::fromEuler_zyx(Vector3D &p) //欧拉角转四元数(航空欧拉角
 #ifdef USECPP11 //4.9.2以上
 void QuatVec::fromEuler_zyx(Vector3D &&p) { fromEuler_zyx(p); }
 #endif
+void QuatVec::fromEuler_zxy(Vector3D &p) //欧拉角转四元数内旋
+{
+	double cx = cos(p.x/2);
+	double sx = sin(p.x/2);
+	double cy = cos(p.y/2);
+	double sy = sin(p.y/2);
+	double cz = cos(p.z/2);
+	double sz = sin(p.z/2);
+	w = cz * cy * cx - sz * sy * sx;
+	x = cz * sy * cx - sz * cy * sx;
+	y = cz * cy * sx + sz * sy * cx;
+	z = cz * sy * sx + sz * cy * cx;
+}
+#ifdef USECPP11 //4.9.2以上
+void QuatVec::fromEuler_zxy(Vector3D &&p) { fromEuler_zxy(p); }
+#endif
+void QuatVec::fromEuler_yxz(Vector3D &p) //欧拉角转四元数内旋
+{
+	double cx = cos(p.x/2);
+	double sx = sin(p.x/2);
+	double cy = cos(p.y/2);
+	double sy = sin(p.y/2);
+	double cz = cos(p.z/2);
+	double sz = sin(p.z/2);
+	w = cy * cx * cz + sy * sx * sz;
+	x = cy * sx * cz + sy * cx * sz;
+	y = sy * cx * cz - cy * sx * sz;
+	z = cy * cx * sz - sy * sx * cz;
+}
+#ifdef USECPP11 //4.9.2以上
+void QuatVec::fromEuler_yxz(Vector3D &&p) { fromEuler_yxz(p); }
+#endif
 
 void QuatVec::fromAxis(Vector3D &axis,double angle) //从转轴和转角构造
 {
@@ -798,26 +864,26 @@ void QuatVec::fromAxis(Vector3D &axis,double angle) //从转轴和转角构造
 void QuatVec::fromAxis(Vector3D &&axis,double angle) { fromAxis(axis,angle); }
 #endif
 
-//载荷旋转->载体欧拉角(航空欧拉角)输入当前欧拉角，载荷坐标系下的微小转动
-void Loader2Carrier(Vector3D &cur,Vector3D &dt)//占用当前欧拉角作为输出
+void QuatVec::fromVector(Vector3D &v) //从向量构造，不完全约束，按直接转过去
 {
-	QuatVec qcur;
-	QuatVec qdt;
-	//首先将两个欧拉角转换为两个四元数，看做是分别从两个物体的0位置开始旋转
-	qcur.fromEuler_zyx(cur);
-	qdt.fromEuler_zyx(dt);
-	//计算两次旋转的结果
-	qcur*=qdt;
-	//Vector3D p;
-	//p.x=1;p.y=0;p.z=0;
-	//qcur.rot(p);
-	//std::cout<<"rot: "<<"x: "<<p.x<<" y: "<<p.y<<" z: "<<p.z<<std::endl;
-	//将合成的旋转转换为欧拉角输出
-	cur=qcur.toEuler_zyx();
-	//p.x=1;p.y=0;p.z=0;
-	//rotate3D_euler_zyx(&p,&cur);
-	//std::cout<<"eulerrot: "<<"x: "<<p.x<<" y: "<<p.y<<" z: "<<p.z<<std::endl;
+	Vector3D u=Vector3D(1,0,0);
+	u=u^v; //得到直接旋转的轴
+	double a=u.norm()/v.magnitude(); //化为sin值
+	a=asin(a);
+	fromAxis(u,a);
 }
+#ifdef USECPP11 //4.9.2以上
+void QuatVec::fromVector(Vector3D &&v) { fromVector(v); }
+#endif
+
+//换参照系：已知两个姿态的大地坐标，求在A为参照系下B的姿态
+QuatVec change_coord(QuatVec &u,QuatVec &coord) //输入载荷姿态、载体姿态（参照系）
+{
+	QuatVec dq; //载荷相对载体的姿态
+	dq=coord.inv()*u; //乘号右侧的先转，就是载荷姿态本身，向载体姿态反向旋转
+	return dq;
+}
+
 ////////////////////////////////////////////////////////////////
 //地理算法
 ////////////////////////////////////////////////////////////////

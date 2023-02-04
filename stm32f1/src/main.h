@@ -34,7 +34,6 @@
 #include <numeric>
 #include <list>
 #include <map>
-#endif
 #ifdef USECPP11 
 #include <tuple>
 #include <regex>
@@ -44,6 +43,7 @@
 #include <future>
 #endif
 using namespace std;
+#endif
 #endif
 
 typedef unsigned char u8;
@@ -119,9 +119,16 @@ typedef signed long long t_maxs;
 				(((n)&0x00ff000000000000)>>40) | (((n)&0xff00000000000000)>>56) )
 
 //数值工具
+typedef union
+{
+	u32 dw;
+	u8 b[4];
+} TYPE_u32u8;
+#define FLOAT_2_INT(f)		((f)<0)? (int)((f)-0.5f) : (int)((f)+0.5f) //四舍五入
 #define MINMAX(d,min,max) if((d)<(min)) (d)=(min); else if((d)>(max)) (d)=(max);
 #define ARRAY_SIZE(d) (sizeof(d)/sizeof(d[0])) //数组长度
 #define PDBG	 printf("%s:%d\n",__FILE__,__LINE__)
+#define PHEX(i,d) for(i=0;i<sizeof(d);i++) printf("%02X ",((u8*)&d)[i]); printf("\n");
 
 #endif
 

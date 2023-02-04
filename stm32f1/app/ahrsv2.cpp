@@ -233,7 +233,7 @@ void CAhrs::imu_run_ground(Vector3D &gv,Vector3D &av,Vector3D &mv,float T) //输
 	//delta_rot.x=(u.x+mu.x+in_gv.x)/2.0f*T;
 	//delta_rot.y=(u.y+mu.y+in_gv.y)/2.0f*T;
 	//delta_rot.z=(u.z+mu.z+in_gv.z)/2.0f*T;
-	cur_quat*=delta_rot;  //融合进最终输出
+	cur_quat=cur_quat*delta_rot;  //融合进最终输出
 	cur_quat.norm();
 	if(is_use_mag) //是否使用罗盘
 	{

@@ -264,6 +264,9 @@ struct Segment3D
 };
 const Segment3D Segment3DEmpty(Vector3DEmpty,Vector3DEmpty);
 
+////////////////////////////////////////////////////////////////
+//					旋转变换
+////////////////////////////////////////////////////////////////
 //四元数
 struct QuatVec
 {
@@ -272,27 +275,36 @@ struct QuatVec
 	double y;
 	double z;
 	double norm(void); //对自己进行归一化
+	QuatVec inv(void); //逆，就是共轭，认为自己是单位四元数
 	void rot(Vector3D &p); //旋转一个点
-	Vector3D toEuler_zyx(void); //转换为欧拉角(航空欧拉角)
-	Vector3D toEuler_zxy(void); //转换为欧拉角
-	void fromEuler_zyx(Vector3D &p); //欧拉角转四元数(航空欧拉角)
+	Vector3D toEuler_zyx(void); //转换为欧拉角内旋(航空欧拉角)
+	Vector3D toEuler_zxy(void); //转换为欧拉角内旋
+	Vector3D toEuler_yxz(void); //转换为欧拉角内旋
+	void fromEuler_zyx(Vector3D &p); //欧拉角转四元数内旋(航空欧拉角)
+	void fromEuler_zxy(Vector3D &p); //欧拉角转四元数内旋
+	void fromEuler_yxz(Vector3D &p); //欧拉角转四元数内旋
 	void fromAxis(Vector3D &axis,double angle); //从转轴和转角构造
+	void fromVector(Vector3D &v); //从向量构造，不完全约束，按直接转过去
 
 #ifdef USECPP11 //4.9.2以上
-	void fromEuler_zyx(Vector3D &&p); //欧拉角转四元数(航空欧拉角)
+	void fromEuler_zyx(Vector3D &&p); //欧拉角转四元数内旋(航空欧拉角)
+	void fromEuler_zxy(Vector3D &&p); //欧拉角转四元数内旋
+	void fromEuler_yxz(Vector3D &&p); //欧拉角转四元数内旋
 	void fromAxis(Vector3D &&axis,double angle); //从转轴和转角构造
+	void fromVector(Vector3D &&v); //从向量构造，不完全约束，按直接转过去
 #endif
 };
 
-void operator*=(QuatVec &q1,QuatVec &q2);
-QuatVec operator*(QuatVec &q1,QuatVec &q2);
+QuatVec operator*(QuatVec &q1,QuatVec &q2); //乘号右侧的先转，恰好与旋转矩阵一样
 
 #ifdef USECPP11 //4.9.2以上
-void operator*=(QuatVec &q1,QuatVec &&q2);
 QuatVec operator*(QuatVec &&q1,QuatVec &&q2);
 QuatVec operator*(QuatVec &q1,QuatVec &&q2);
 QuatVec operator*(QuatVec &&q1,QuatVec &q2);
 #endif
+
+//换坐标：已知两个姿态的大地坐标，求在A为参照系下B的姿态
+QuatVec change_coord(QuatVec &u,QuatVec &coord); //输入载荷姿态、载体姿态（参照系）
 
 Vector2D matrix_trans2D(Vector2D &k,double t[][3]); //2D矩阵变换
 Vector3D matrix_trans3D(Vector3D &k,double t[][4]); //3D矩阵变换
@@ -306,19 +318,17 @@ Vector2D rotate2D(Vector2D &&k,double r); //2D相对于(0,0)旋转变换 //弧�
 #endif
 
 Vector2D rotateToVector2D(Vector2D &k,Vector2D &c,double r); //2D相对于C(cx,cy)旋转变换
-//3D旋转:y-x-z输入点和欧拉角,原位操作
-//Vector3D rotate3D_euler_yxz(Vector3D &p,Vector3D &euler);//弧度制
-//Vector3D rotate3D_euler_yxz(Vector3D &&p,Vector3D &&euler);//弧度制
-//Vector3D rotate3D_euler_yxz(Vector3D &p,Vector3D &&euler);//弧度制
-//Vector3D rotate3D_euler_yxz(Vector3D &&p,Vector3D &euler);//弧度制
-//3D旋转:z-x-y输入点和欧拉角,原位操作
+//3D旋转:输入点和欧拉角单个角
+Vector3D rotate3D_euler_x(Vector3D &p,double ang); //弧度制
+Vector3D rotate3D_euler_y(Vector3D &p,double ang); //弧度制
+Vector3D rotate3D_euler_z(Vector3D &p,double ang); //弧度制
+
+//3D旋转:z-x-y输入点和欧拉角
 Vector3D rotate3D_euler_zxy(Vector3D &p,Vector3D &euler);//弧度制
-//3D旋转:z-y-x输入点和欧拉角,原位操作(航空欧拉角)
+//3D旋转:z-y-x输入点和欧拉角(航空欧拉角)
 Vector3D rotate3D_euler_zyx(Vector3D &p,Vector3D &euler);//弧度制
-//3D旋转:x-y-z输入点和欧拉角,原位操作
-Vector3D rotate3D_euler_xyz(Vector3D &p,Vector3D &euler);//弧度制
-//载荷旋转->载体欧拉角(航空欧拉角)输入当前欧拉角，载荷坐标系下的微小转动
-void Loader2Carrier(Vector3D &cur,Vector3D &dt);//占用当前欧拉角作为输出
+//3D旋转:y-x-z输入
+Vector3D rotate3D_euler_yxz(Vector3D &p,Vector3D &euler);//弧度制
 
 #ifdef USECPP11 //4.9.2以上
 Vector3D rotate3D_euler_zxy(Vector3D &&p,Vector3D &&euler);//弧度制
@@ -327,9 +337,9 @@ Vector3D rotate3D_euler_zxy(Vector3D &&p,Vector3D &euler);//弧度制
 Vector3D rotate3D_euler_zyx(Vector3D &&p,Vector3D &&euler);//弧度制
 Vector3D rotate3D_euler_zyx(Vector3D &p,Vector3D &&euler);//弧度制
 Vector3D rotate3D_euler_zyx(Vector3D &&p,Vector3D &euler);//弧度制
-Vector3D rotate3D_euler_xyz(Vector3D &&p,Vector3D &&euler);//弧度制
-Vector3D rotate3D_euler_xyz(Vector3D &p,Vector3D &&euler);//弧度制
-Vector3D rotate3D_euler_xyz(Vector3D &&p,Vector3D &euler);//弧度制
+Vector3D rotate3D_euler_yxz(Vector3D &&p,Vector3D &&euler);//弧度制
+Vector3D rotate3D_euler_yxz(Vector3D &p,Vector3D &&euler);//弧度制
+Vector3D rotate3D_euler_yxz(Vector3D &&p,Vector3D &euler);//弧度制
 #endif
 
 ////////////////////////////////////////////////////////////////
