@@ -128,7 +128,6 @@ void app_poll(void)
 	start_time=SYS_time;
 	float T=(SYS_time-pre_time)/10000.0f;
 	pre_time=SYS_time;
-	u16 tmpe;
 //////////////////////////////////////////////////////////////
 //惯导部分
 	get_org_data();
@@ -162,28 +161,6 @@ void app_poll(void)
 		send_out2();
 	}
 	tick++;
-//////////////////////////////////////////////////////////////
-//显示
-	switch(printflag)
-	{
-	case 0: //连时间也不输出
-		procT=(SYS_time-start_time)/10.0;
-		return ;
-		break;
-	case 1:
-		printf("%.2f	%.2f	%.2f	",cur_eular.x,cur_eular.y,cur_eular.z);
-		break;
-	case 2:
-		break;
-	default:
-		break;
-	}
-	procT=(SYS_time-start_time)/10.0;
-	printf("%.1fms\r\n",procT);
-	if (procT>10)
-	{
-		procT=10;
-	}
 }
 
 //通信
@@ -215,7 +192,6 @@ int pre_configtask(u8 *p,int len)//返回整包长度
 }
 int pro_configtask(u8 *p,int n)//返回整包长度
 {
-	int i;
 	u8 sum=check_sum(p,n-1);
 	if(sum!=p[n-1]) 
 	{

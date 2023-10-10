@@ -13,7 +13,6 @@ float sqr(float d)
 }
 void CAhrs::ini(void)
 {
-	int i;
 	cur_quat.w=1;
 	cur_quat.x=0;
 	cur_quat.y=0;
@@ -144,9 +143,9 @@ void CAhrs::imu_run_ground(Vector3D &gv,Vector3D &av,Vector3D &mv,float T) //输
 	float eabs_x=fabs(Gerr.x);
 	float eabs_y=fabs(Gerr.y);
 	float eabs_z=fabs(Gerr.z);
-	up=Gerr*P*1000;
+	up=Gerr*P*1000.0f;
 	d_pre=d_pre*0.99f+(Gerr-Gerr_pre)*0.01f;
-	ud=d_pre*D*1000;
+	ud=d_pre*D*1000.0f;
 	Gerr_pre=Gerr;
 	//太大了，不积分
 	if(eabs_x>deg2rad(1.0f) || eabs_x<deg2rad(0.1f)) Gerr_acc.x-=Gerr.x*I;
@@ -187,16 +186,17 @@ void CAhrs::imu_run_ground(Vector3D &gv,Vector3D &av,Vector3D &mv,float T) //输
 	else if(Gerr_acc.y<-deg2rad(0.3f)) {Gerr_acc.y=-deg2rad(0.3f);}
 	if(Gerr_acc.z>deg2rad(0.3f)) {Gerr_acc.z=deg2rad(0.3f);}
 	else if(Gerr_acc.z<-deg2rad(0.3f)) {Gerr_acc.z=-deg2rad(0.3f);}
-	ui=Gerr_acc*1000;
+	ui=Gerr_acc*1000.0f;
 	//小范围内，增加P作用
 	if(eabs_x<deg2rad(0.3f)) {up.x*=2*sqr(1-eabs_x/deg2rad(0.3f))+1;ui.x/=2;}
 	if(eabs_y<deg2rad(0.3f)) {up.y*=2*sqr(1-eabs_y/deg2rad(0.3f))+1;ui.y/=2;}
 	if(eabs_z<deg2rad(0.3f)) {up.z*=2*sqr(1-eabs_z/deg2rad(0.3f))+1;ui.z/=2;}
-	u= (up+ui+ud)/1000; //控制器输出
+	u= (up+ui+ud)/1000.0f; //控制器输出
 /////////////////////////////////////////////////////////
 //			磁力计部分
 /////////////////////////////////////////////////////////
 	//if(tick%10==0 || is_first)
+	if(is_use_mag) //是否使用罗盘
 	{
 		m_pri=get_m_pri(m_mag); //得到当前罗盘信度
 		P=kp*m_pri;
@@ -211,7 +211,7 @@ void CAhrs::imu_run_ground(Vector3D &gv,Vector3D &av,Vector3D &mv,float T) //输
 		Merr_acc.z+=delta_yaw*I;
 		if(is_first)
 		{
-			mup=mup*3;//若是第一次
+			mup=mup*3.0f;//若是第一次
 		}
 		eabs_z=fabs(Merr.z);
 		if(Merr.z*Merr_acc.z<0) Merr_acc.z*=0.98f; //大范围内直接削弱
@@ -234,7 +234,6 @@ void CAhrs::imu_run_ground(Vector3D &gv,Vector3D &av,Vector3D &mv,float T) //输
 	//delta_rot.y=(u.y+mu.y+in_gv.y)/2.0f*T;
 	//delta_rot.z=(u.z+mu.z+in_gv.z)/2.0f*T;
 	cur_quat=cur_quat*delta_rot;  //融合进最终输出
-	cur_quat.norm();
 	if(is_use_mag) //是否使用罗盘
 	{
 		eular=cur_quat.toEuler_zyx();

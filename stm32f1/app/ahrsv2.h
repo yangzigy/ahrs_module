@@ -76,10 +76,10 @@ public:
 		kp=0.3f; //
 		ki=0.0001f; //
 		kd=30;
-		cur_a_k=0.1; //加计姿态滤波系数
-		evel_a_k=0.001; //加计评估滤波系数
+		cur_a_k=0.1f; //加计姿态滤波系数
+		evel_a_k=0.001f; //加计评估滤波系数
 		cur_m_k=0.008f; //罗盘姿态滤波系数
-		evel_m_k=0.005; //罗盘评估滤波系数
+		evel_m_k=0.005f; //罗盘评估滤波系数
 		is_first=2000; //是否是第一次
 		speed=Vector3DEmpty;
 		pos=Vector3DEmpty;

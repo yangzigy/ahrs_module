@@ -17,7 +17,7 @@
 #include"geometric.h"
 #include<math.h>
 
-double deg_range(double d) //角度限制在正负180度
+GEO_FLOAT deg_range(GEO_FLOAT d) //角度限制在正负180度
 {
 	while(d>180)
 	{
@@ -29,7 +29,7 @@ double deg_range(double d) //角度限制在正负180度
 	}
 	return d;
 }
-double rad_range(double d) //弧度限制在正负180度
+GEO_FLOAT rad_range(GEO_FLOAT d) //弧度限制在正负180度
 {
 	while(d>PI)
 	{
@@ -68,48 +68,48 @@ Vector2D operator-(Vector2D &&p1,Vector2D &p2) { return p1-p2;}
 #endif
 
 #ifndef USECPP11 //4.9.2
-double operator*(Vector2D p1,Vector2D p2) { return p1.x*p2.x+p1.y*p2.y; } //点乘
+GEO_FLOAT operator*(Vector2D p1,Vector2D p2) { return p1.x*p2.x+p1.y*p2.y; } //点乘
 #else
-double operator*(Vector2D &p1,Vector2D &p2) //点乘
+GEO_FLOAT operator*(Vector2D &p1,Vector2D &p2) //点乘
 {
 	return p1.x*p2.x+p1.y*p2.y;
 }
-double operator*(Vector2D &&p1,Vector2D &&p2) { return p1*p2;}
-double operator*(Vector2D &p1,Vector2D &&p2) { return p1*p2;}
-double operator*(Vector2D &&p1,Vector2D &p2) { return p1*p2;}
+GEO_FLOAT operator*(Vector2D &&p1,Vector2D &&p2) { return p1*p2;}
+GEO_FLOAT operator*(Vector2D &p1,Vector2D &&p2) { return p1*p2;}
+GEO_FLOAT operator*(Vector2D &&p1,Vector2D &p2) { return p1*p2;}
 #endif
 
-Vector2D operator+(Vector2D &p1,double k)
+Vector2D operator+(Vector2D &p1,GEO_FLOAT k)
 {
 	return Vector2D(p1.x+k,p1.y+k);
 }
-Vector2D operator-(Vector2D &p1,double k)
+Vector2D operator-(Vector2D &p1,GEO_FLOAT k)
 {
 	return Vector2D(p1.x-k,p1.y-k);
 }
-Vector2D operator*(Vector2D &p1,double k)
+Vector2D operator*(Vector2D &p1,GEO_FLOAT k)
 {
 	return Vector2D(p1.x*k,p1.y*k);
 }
-Vector2D operator/(Vector2D &p1,double k)
+Vector2D operator/(Vector2D &p1,GEO_FLOAT k)
 {
 	return Vector2D(p1.x/k,p1.y/k);
 }
 
 #ifdef USECPP11 //4.9.2以上
-Vector2D operator+(Vector2D &&p1,double k) { return p1+k; }
-Vector2D operator-(Vector2D &&p1,double k) { return p1-k; }
-Vector2D operator*(Vector2D &&p1,double k) { return p1*k; }
-Vector2D operator/(Vector2D &&p1,double k) { return p1/k; }
+Vector2D operator+(Vector2D &&p1,GEO_FLOAT k) { return p1+k; }
+Vector2D operator-(Vector2D &&p1,GEO_FLOAT k) { return p1-k; }
+Vector2D operator*(Vector2D &&p1,GEO_FLOAT k) { return p1*k; }
+Vector2D operator/(Vector2D &&p1,GEO_FLOAT k) { return p1/k; }
 #endif
 
-double Vector2D::magnitude(void) //2D向量幅度
+GEO_FLOAT Vector2D::magnitude(void) //2D向量幅度
 {
 	return sqrt(x*x+y*y);
 }
-double Vector2D::norm(void) //2D向量归一化
+GEO_FLOAT Vector2D::norm(void) //2D向量归一化
 {
-	double mag=magnitude();
+	GEO_FLOAT mag=magnitude();
 	if (fabs(mag)>Eps)
 	{
 		x/=mag;
@@ -117,26 +117,26 @@ double Vector2D::norm(void) //2D向量归一化
 	}
 	return mag;
 }
-double Vector2D::distance(Vector2D &p1) //2D向量距离
+GEO_FLOAT Vector2D::distance(Vector2D &p1) //2D向量距离
 {
 	Vector2D p=p1-*this;
 	return p.norm();
 }
 
-double Vector2D::angle(Vector2D &p1) //两向量夹角
+GEO_FLOAT Vector2D::angle(Vector2D &p1) //两向量夹角
 {
 	return acos((p1.x*x+p1.y*y)/sqrt(p1.x*p1.x+p1.y*p1.y)/sqrt(x*x+y*y));
 }
 #ifdef USECPP11 //4.9.2以上
-double Vector2D::distance(Vector2D &&p1) { return distance(p1);}
-double Vector2D::angle(Vector2D &&p1) { return angle(p1); }
+GEO_FLOAT Vector2D::distance(Vector2D &&p1) { return distance(p1);}
+GEO_FLOAT Vector2D::angle(Vector2D &&p1) { return angle(p1); }
 #endif
 
 //3D向量基本运算
 #ifndef USECPP11 //4.9.2
 Vector3D operator+(Vector3D p1,Vector3D p2) { return Vector3D(p1.x+p2.x,p1.y+p2.y,p1.z+p2.z); }
 Vector3D operator-(Vector3D p1,Vector3D p2) { return Vector3D(p1.x-p2.x,p1.y-p2.y,p1.z-p2.z); }
-double operator*(Vector3D p1,Vector3D p2) { return p1.x*p2.x+p1.y*p2.y+p1.z*p2.z; } //点乘
+GEO_FLOAT operator*(Vector3D p1,Vector3D p2) { return p1.x*p2.x+p1.y*p2.y+p1.z*p2.z; } //点乘
 Vector3D operator^(Vector3D p1,Vector3D p2)
 {
 	Vector3D p=Vector3DEmpty;
@@ -145,19 +145,19 @@ Vector3D operator^(Vector3D p1,Vector3D p2)
 	p.z=p1.x*p2.y-p1.y*p2.x;
 	return p;
 }
-Vector3D operator+(Vector3D p1,double k)
+Vector3D operator+(Vector3D p1,GEO_FLOAT k)
 {
 	return Vector3D(p1.x+k,p1.y+k,p1.z+k);
 }
-Vector3D operator-(Vector3D p1,double k)
+Vector3D operator-(Vector3D p1,GEO_FLOAT k)
 {
 	return Vector3D(p1.x-k,p1.y-k,p1.z-k);
 }
-Vector3D operator*(Vector3D p1,double k)
+Vector3D operator*(Vector3D p1,GEO_FLOAT k)
 {
 	return Vector3D(p1.x*k,p1.y*k,p1.z*k);
 }
-Vector3D operator/(Vector3D p1,double k)
+Vector3D operator/(Vector3D p1,GEO_FLOAT k)
 {
 	return Vector3D(p1.x/k,p1.y/k,p1.z/k);
 }
@@ -170,7 +170,7 @@ Vector3D operator-(Vector3D &p1,Vector3D &p2)
 {
 	return Vector3D(p1.x-p2.x,p1.y-p2.y,p1.z-p2.z);
 }
-double operator*(Vector3D &p1,Vector3D &p2) //点乘
+GEO_FLOAT operator*(Vector3D &p1,Vector3D &p2) //点乘
 {
 	return p1.x*p2.x+p1.y*p2.y+p1.z*p2.z;
 }
@@ -188,41 +188,41 @@ Vector3D operator+(Vector3D &&p1,Vector3D &p2) { return p1+p2; }
 Vector3D operator-(Vector3D &&p1,Vector3D &&p2) { return p1-p2; }
 Vector3D operator-(Vector3D &p1,Vector3D &&p2) { return p1-p2; }
 Vector3D operator-(Vector3D &&p1,Vector3D &p2) { return p1-p2; }
-double operator*(Vector3D &&p1,Vector3D &&p2) { return p1*p2; }
-double operator*(Vector3D &p1,Vector3D &&p2) { return p1*p2; }
-double operator*(Vector3D &&p1,Vector3D &p2) { return p1*p2; }
+GEO_FLOAT operator*(Vector3D &&p1,Vector3D &&p2) { return p1*p2; }
+GEO_FLOAT operator*(Vector3D &p1,Vector3D &&p2) { return p1*p2; }
+GEO_FLOAT operator*(Vector3D &&p1,Vector3D &p2) { return p1*p2; }
 Vector3D operator^(Vector3D &&p1,Vector3D &&p2) { return p1^p2; }
 Vector3D operator^(Vector3D &p1,Vector3D &&p2) { return p1^p2; }
 Vector3D operator^(Vector3D &&p1,Vector3D &p2) { return p1^p2; }
-Vector3D operator+(Vector3D &p1,double k)
+Vector3D operator+(Vector3D &p1,GEO_FLOAT k)
 {
 	return Vector3D(p1.x+k,p1.y+k,p1.z+k);
 }
-Vector3D operator-(Vector3D &p1,double k)
+Vector3D operator-(Vector3D &p1,GEO_FLOAT k)
 {
 	return Vector3D(p1.x-k,p1.y-k,p1.z-k);
 }
-Vector3D operator*(Vector3D &p1,double k)
+Vector3D operator*(Vector3D &p1,GEO_FLOAT k)
 {
 	return Vector3D(p1.x*k,p1.y*k,p1.z*k);
 }
-Vector3D operator/(Vector3D &p1,double k)
+Vector3D operator/(Vector3D &p1,GEO_FLOAT k)
 {
 	return Vector3D(p1.x/k,p1.y/k,p1.z/k);
 }
-Vector3D operator+(Vector3D &&p1,double k) { return p1+k; }
-Vector3D operator-(Vector3D &&p1,double k) { return p1-k; }
-Vector3D operator*(Vector3D &&p1,double k) { return p1*k; }
-Vector3D operator/(Vector3D &&p1,double k) { return p1/k; }
+Vector3D operator+(Vector3D &&p1,GEO_FLOAT k) { return p1+k; }
+Vector3D operator-(Vector3D &&p1,GEO_FLOAT k) { return p1-k; }
+Vector3D operator*(Vector3D &&p1,GEO_FLOAT k) { return p1*k; }
+Vector3D operator/(Vector3D &&p1,GEO_FLOAT k) { return p1/k; }
 #endif
 
-double Vector3D::magnitude(void) //3D向量幅度
+GEO_FLOAT Vector3D::magnitude(void) //3D向量幅度
 {
 	return sqrt(x*x+y*y+z*z);
 }
-double Vector3D::norm(void) //3D向量归一化
+GEO_FLOAT Vector3D::norm(void) //3D向量归一化
 {
-	double mag=magnitude();
+	GEO_FLOAT mag=magnitude();
 	if (fabs(mag)>Eps)
 	{
 		x/=mag;
@@ -231,20 +231,20 @@ double Vector3D::norm(void) //3D向量归一化
 	}
 	return mag;
 }
-double Vector3D::distance(Vector3D &p1) //3D向量距离
+GEO_FLOAT Vector3D::distance(Vector3D &p1) //3D向量距离
 {
 	Vector3D p=p1-*this;
 	return p.norm();
 }
 
-double Vector3D::angle(Vector3D &p1) //两向量夹角
+GEO_FLOAT Vector3D::angle(Vector3D &p1) //两向量夹角
 {
 	return acos((p1.x*x+p1.y*y+p1.z*z)/sqrt(p1.x*p1.x+p1.y*p1.y+p1.z*p1.z)
 		/sqrt(x*x+y*y+z*z));
 }
 #ifdef USECPP11 //4.9.2以上
-double Vector3D::distance(Vector3D &&p1) { return distance(p1); }
-double Vector3D::angle(Vector3D &&p1) { return angle(p1); }
+GEO_FLOAT Vector3D::distance(Vector3D &&p1) { return distance(p1); }
+GEO_FLOAT Vector3D::angle(Vector3D &&p1) { return angle(p1); }
 #endif
 ///////////////////////////////////////////////////////////////
 void Line2D::create(Vector2D &p1,Vector2D &p2) //两点生成线
@@ -278,7 +278,7 @@ Line2D Line2D::vertical(Vector2D &&p1) { return vertical(p1); }
 
 bool Line2D::cross(Line2D &l,Vector2D &p1) //求两直线的交点，false无交点
 {
-	double t=0; //以解方程的方法来求
+	GEO_FLOAT t=0; //以解方程的方法来求
 	t=(k.x*l.k.y - k.y*l.k.x); //t1的系数,本身为1
 	if(fabs(t)<0.000001)
 	{
@@ -293,14 +293,14 @@ bool Line2D::cross(Line2D &l,Vector2D &p1) //求两直线的交点，false无交
 bool Line2D::cross(Line2D &&l,Vector2D &p1)  { return cross(l,p1); }
 #endif
 
-Vector2D Line2D::Cal_P_Dis(Vector2D &p1,double d) //在直线上，距离给定点一定距离的点。（距离有正负之分）
+Vector2D Line2D::Cal_P_Dis(Vector2D &p1,GEO_FLOAT d) //在直线上，距离给定点一定距离的点。（距离有正负之分）
 {
-	double t;
+	GEO_FLOAT t;
 	t=d/k.magnitude(); //然后得到参数
 	return k*t+p1;//认为给定点严格在直线上
 }
 #ifdef USECPP11 //4.9.2以上
-Vector2D Line2D::Cal_P_Dis(Vector2D &&p1,double d) { return Cal_P_Dis(p1,d); }
+Vector2D Line2D::Cal_P_Dis(Vector2D &&p1,GEO_FLOAT d) { return Cal_P_Dis(p1,d); }
 #endif
 
 Vector2D Line2D::vert_point(Vector2D &p1) //点到直线的垂点
@@ -315,13 +315,13 @@ Vector2D Line2D::vert_point(Vector2D &p1) //点到直线的垂点
 Vector2D Line2D::vert_point(Vector2D &&p1) { return vert_point(p1); }
 #endif
 
-double Line2D::distance(Vector2D &p1) //点到直线距离
+GEO_FLOAT Line2D::distance(Vector2D &p1) //点到直线距离
 {
 	Vector2D p2=vert_point(p1); //求垂点
 	return p2.distance(p1);
 }
 #ifdef USECPP11 //4.9.2以上
-double Line2D::distance(Vector2D &&p1) { return distance(p1); }
+GEO_FLOAT Line2D::distance(Vector2D &&p1) { return distance(p1); }
 #endif
 
 ////////////////////////////////////////////////////////////
@@ -357,7 +357,7 @@ bool Line3D::cross(Line3D &l,Vector3D &p1) //求两直线的交点(相距最近�
 	//[t1;t2;tv]=[k1 -k2 -kv]^-1*[b2-b1]
 	Vector3D kv;
 	kv=k^l.k; //求垂线
-	double d=kv.norm(); //归一化
+	GEO_FLOAT d=kv.norm(); //归一化
 	if (fabs(d)<Eps) //若两线平行
 	{
 		return false;
@@ -366,13 +366,13 @@ bool Line3D::cross(Line3D &l,Vector3D &p1) //求两直线的交点(相距最近�
 	d=	k.x*(l.k.y*kv.z - l.k.z*kv.y) - 
 		k.y*(l.k.x*kv.z - l.k.z*kv.x) + 
 		k.z*(l.k.x*kv.y - l.k.y*kv.x); //行列式值
-	double bx=l.p.x-p.x;
-	double by=l.p.y-p.y;
-	double bz=l.p.z-p.z; //B2-B1
-	double t1=	(l.k.y*kv.z-l.k.z*kv.y)*bx +
+	GEO_FLOAT bx=l.p.x-p.x;
+	GEO_FLOAT by=l.p.y-p.y;
+	GEO_FLOAT bz=l.p.z-p.z; //B2-B1
+	GEO_FLOAT t1=	(l.k.y*kv.z-l.k.z*kv.y)*bx +
 				(l.k.z*kv.x-l.k.x*kv.z)*by +
 				(l.k.x*kv.y-l.k.y*kv.x)*bz;
-	double t2=	(k.y*kv.z-k.z*kv.y)*bx +
+	GEO_FLOAT t2=	(k.y*kv.z-k.z*kv.y)*bx +
 				(k.z*kv.x-k.x*kv.z)*by +
 				(k.x*kv.y-k.y*kv.x)*bz;
 	t1/=d;
@@ -384,7 +384,7 @@ bool Line3D::cross(Line3D &l,Vector3D &p1) //求两直线的交点(相距最近�
 bool Line3D::cross(Line3D &&l,Vector3D &p1) { return cross(l,p1); }
 #endif
 
-double Line3D::line_distance(Line3D &l) //求两直线间距
+GEO_FLOAT Line3D::line_distance(Line3D &l) //求两直线间距
 {
 	Vector3D kv;
 	kv=k^l.k; //求垂线
@@ -393,17 +393,17 @@ double Line3D::line_distance(Line3D &l) //求两直线间距
 	return kv*(l.p-p); //求参数
 }
 #ifdef USECPP11 //4.9.2以上
-double Line3D::line_distance(Line3D &&l) { return line_distance(l); }
+GEO_FLOAT Line3D::line_distance(Line3D &&l) { return line_distance(l); }
 #endif
 
-Vector3D Line3D::Cal_P_Dis(Vector3D &p1,double d) //在直线上，距离给定点一定距离的点。（距离有正负之分）
+Vector3D Line3D::Cal_P_Dis(Vector3D &p1,GEO_FLOAT d) //在直线上，距离给定点一定距离的点。（距离有正负之分）
 {
-	double t;
+	GEO_FLOAT t;
 	t=d/k.magnitude(); //然后得到参数
 	return k*t+p1;//认为给定点严格在直线上
 }
 #ifdef USECPP11 //4.9.2以上
-Vector3D Line3D::Cal_P_Dis(Vector3D &&p1,double d) { return Cal_P_Dis(p1,d); }
+Vector3D Line3D::Cal_P_Dis(Vector3D &&p1,GEO_FLOAT d) { return Cal_P_Dis(p1,d); }
 #endif
 
 Vector3D Line3D::vert_point(Vector3D &p1) //点到直线的垂点
@@ -418,14 +418,14 @@ Vector3D Line3D::vert_point(Vector3D &p1) //点到直线的垂点
 Vector3D Line3D::vert_point(Vector3D &&p1) { return vert_point(p1); }
 #endif
 
-double Line3D::distance(Vector3D &p1) //点到直线距离
+GEO_FLOAT Line3D::distance(Vector3D &p1) //点到直线距离
 {
 	Vector3D tmp;
 	tmp=vert_point(p1);
 	return p1.distance(tmp);
 }
 #ifdef USECPP11 //4.9.2以上
-double Line3D::distance(Vector3D &&p1) { return distance(p1); }
+GEO_FLOAT Line3D::distance(Vector3D &&p1) { return distance(p1); }
 #endif
 
 ///////////////////////////////////////////////////////////
@@ -456,12 +456,12 @@ bool Surface::cross(Line3D &l,Vector3D &p1) //线面交点，返回是否有交�
 	//面方程：A·X=d
 	//线方程：X=Kt+P
 	//将X代入，A·Kt+A·P=b，求得t，进而求得X
-	double AK=k*l.k;
+	GEO_FLOAT AK=k*l.k;
 	if (fabs(AK)<Eps)
 	{
 		return false;
 	}
-	double t=(b-k*l.p)/AK;
+	GEO_FLOAT t=(b-k*l.p)/AK;
 	p1=l.k*t+l.p;
 	return true;
 }
@@ -482,14 +482,14 @@ Vector3D Surface::vert_point(Vector3D &p1) //点面垂点
 Vector3D Surface::vert_point(Vector3D &&p1) { return vert_point(p1); }
 #endif
 
-double Surface::distance(Vector3D &p1) //点面距
+GEO_FLOAT Surface::distance(Vector3D &p1) //点面距
 {
 	Vector3D tmp;
 	tmp=vert_point(p1);//求垂点
 	return tmp.distance(p1);
 }
 #ifdef USECPP11 //4.9.2以上
-double Surface::distance(Vector3D &&p1) { return distance(p1); }
+GEO_FLOAT Surface::distance(Vector3D &&p1) { return distance(p1); }
 #endif
 
 ///////////////////////////////////////////////////////////
@@ -497,8 +497,8 @@ double Surface::distance(Vector3D &&p1) { return distance(p1); }
 Vector2D Segment2D::proj_point(Vector2D &p1) //点到线段距离最短的点（点到线段距离）
 {//线段AB以外P点到AB最短距离的点为C
 	Vector2D unit_ab=end-st; //AB单位向量
-	double val_ab=unit_ab.norm();
-	double val_ac=(p1-st)*unit_ab; //AP * (AB/abs(AB))
+	GEO_FLOAT val_ab=unit_ab.norm();
+	GEO_FLOAT val_ac=(p1-st)*unit_ab; //AP * (AB/abs(AB))
 	if(val_ac>val_ab) return end; //投影点在线段终点B以外
 	if(val_ac<0) return st; //投影点在线段终点B以外
 	return unit_ab*val_ac+st;
@@ -510,8 +510,8 @@ Vector2D Segment2D::proj_point(Vector2D &&p1) { return proj_point(p1); } //点�
 Vector3D Segment3D::proj_point(Vector3D &p1) //点到线段距离最短的点（点到线段距离）
 {//线段AB以外P点到AB最短距离的点为C
 	Vector3D unit_ab=end-st; //AB单位向量
-	double val_ab=unit_ab.norm();
-	double val_ac=(p1-st)*unit_ab; //AP * (AB/abs(AB))
+	GEO_FLOAT val_ab=unit_ab.norm();
+	GEO_FLOAT val_ac=(p1-st)*unit_ab; //AP * (AB/abs(AB))
 	if(val_ac>val_ab) return end; //投影点在线段终点B以外
 	if(val_ac<0) return st; //投影点在线段终点B以外
 	return unit_ab*val_ac+st;
@@ -521,12 +521,12 @@ Vector3D Segment3D::proj_point(Vector3D &&p1) { return proj_point(p1); } //点�
 #endif
 ///////////////////////////////////////////////////////////
 //2D矩阵变换
-Vector2D matrix_trans2D(Vector2D &k,double t[][3])
+Vector2D matrix_trans2D(Vector2D &k,GEO_FLOAT t[][3])
 {
 	int i,s;
 	Vector2D ret;
-	double m[3] = {k.x,k.y,1};
-	double r[3] = {0,0,0};
+	GEO_FLOAT m[3] = {k.x,k.y,1};
+	GEO_FLOAT r[3] = {0,0,0};
 	for(i=0;i<3;i++)
 	{
 		for(s=0;s<3;s++)
@@ -540,12 +540,12 @@ Vector2D matrix_trans2D(Vector2D &k,double t[][3])
 }
 
 //3D矩阵变换
-Vector3D matrix_trans3D(Vector3D &k,double t[][4])
+Vector3D matrix_trans3D(Vector3D &k,GEO_FLOAT t[][4])
 {
 	int i,s;
 	Vector3D ret;
-	double m[4] = {k.x,k.y,k.z,1};
-	double r[4] = {0,0,0,0};
+	GEO_FLOAT m[4] = {k.x,k.y,k.z,1};
+	GEO_FLOAT r[4] = {0,0,0,0};
 	for(i=0;i<4;i++)
 	{
 		for(s=0;s<4;s++)
@@ -560,13 +560,13 @@ Vector3D matrix_trans3D(Vector3D &k,double t[][4])
 }
 
 //2D向量平移变换
-Vector2D translate2D(Vector2D &k,double tx,double ty)
+Vector2D translate2D(Vector2D &k,GEO_FLOAT tx,GEO_FLOAT ty)
 {
 	int i,s;
 	Vector2D ret;
-	double m[3] = {k.x,k.y,1};
-	double t[3][3] = {{1,0,0},{0,1,0},{tx,ty,1}};
-	double r[3] = {0,0,0};
+	GEO_FLOAT m[3] = {k.x,k.y,1};
+	GEO_FLOAT t[3][3] = {{1,0,0},{0,1,0},{tx,ty,1}};
+	GEO_FLOAT r[3] = {0,0,0};
 	for(i=0;i<3;i++)
 		for(s=0;s<3;s++)
 			r[i] = m[s] * t[s][i] + r[i];
@@ -576,13 +576,13 @@ Vector2D translate2D(Vector2D &k,double tx,double ty)
 }
 
 //2D相对于(0,0)比例变换
-Vector2D scale2D(Vector2D &k,double a,double d)
+Vector2D scale2D(Vector2D &k,GEO_FLOAT a,GEO_FLOAT d)
 {
 	int i,s;
 	Vector2D ret;
-	double m[3] = {k.x,k.y,1};
-	double t[3][3] = {{a,0,0},{0,d,0},{0,0,1}};
-	double r[3] = {0,0,0};
+	GEO_FLOAT m[3] = {k.x,k.y,1};
+	GEO_FLOAT t[3][3] = {{a,0,0},{0,d,0},{0,0,1}};
+	GEO_FLOAT r[3] = {0,0,0};
 	for(i=0;i<3;i++)
 		for(s=0;s<3;s++)
 			r[i] = m[s] * t[s][i] + r[i];
@@ -592,13 +592,13 @@ Vector2D scale2D(Vector2D &k,double a,double d)
 }
 
 //2D相对于C(cx,cy)比例变换
-Vector2D scaleToVector2D(Vector2D &k,Vector2D &c,double a,double d)
+Vector2D scaleToVector2D(Vector2D &k,Vector2D &c,GEO_FLOAT a,GEO_FLOAT d)
 {
 	int i,s;
 	Vector2D ret;
-	double m[3] = {k.x,k.y,1};
-	double t[3][3] = {{a,0,0},{0,d,0},{c.x * (1-a),c.y * (1-d),1}};
-	double r[3] = {0,0,0};
+	GEO_FLOAT m[3] = {k.x,k.y,1};
+	GEO_FLOAT t[3][3] = {{a,0,0},{0,d,0},{c.x * (1-a),c.y * (1-d),1}};
+	GEO_FLOAT r[3] = {0,0,0};
 	for(i=0;i<3;i++)
 		for(s=0;s<3;s++)
 			r[i] = m[s] * t[s][i] + r[i];
@@ -608,22 +608,22 @@ Vector2D scaleToVector2D(Vector2D &k,Vector2D &c,double a,double d)
 }
 
 //2D相对于(0,0)旋转变换
-Vector2D rotate2D(Vector2D &k,double r) //弧度
+Vector2D rotate2D(Vector2D &k,GEO_FLOAT r) //弧度
 {
 	return Vector2D( k.x*cos(r)-k.y*sin(r), k.x*sin(r)+k.y*cos(r));
 }
 #ifdef USECPP11 //4.9.2以上
-Vector2D rotate2D(Vector2D &&k,double r) { return rotate2D(k,r); }
+Vector2D rotate2D(Vector2D &&k,GEO_FLOAT r) { return rotate2D(k,r); }
 #endif
 
 //2D相对于C(cx,cy)旋转变换
-Vector2D rotateToVector2D(Vector2D &k,Vector2D &c,double r)
+Vector2D rotateToVector2D(Vector2D &k,Vector2D &c,GEO_FLOAT r)
 {
 	int i,s;
 	Vector2D ret;
-	double m[3] = {k.x,k.y,1};
-	double t[3][3] = {{cos(r),sin(r),0},{-sin(r),cos(r),0},{c.x - c.x * cos(r) + c.y * sin(r),c.y - c.x * sin(r) - c.y * cos(r),1}};
-	double n[3] = {0,0,0};
+	GEO_FLOAT m[3] = {k.x,k.y,1};
+	GEO_FLOAT t[3][3] = {{cos(r),sin(r),0},{-sin(r),cos(r),0},{c.x - c.x * cos(r) + c.y * sin(r),c.y - c.x * sin(r) - c.y * cos(r),1}};
+	GEO_FLOAT n[3] = {0,0,0};
 	for(i=0;i<3;i++)
 		for(s=0;s<3;s++)
 			n[i] = m[s] * t[s][i] + n[i];
@@ -634,30 +634,30 @@ Vector2D rotateToVector2D(Vector2D &k,Vector2D &c,double r)
 
 //////////////////////////////////////////////////////////////////////////
 //3D旋转:输入点和欧拉角单个角
-Vector3D rotate3D_euler_x(Vector3D &p,double ang)//弧度制
+Vector3D rotate3D_euler_x(Vector3D &p,GEO_FLOAT ang)//弧度制
 {
-	double sa=sin(ang);
-	double ca=cos(ang);
+	GEO_FLOAT sa=sin(ang);
+	GEO_FLOAT ca=cos(ang);
 	return Vector3D(
 		p.x,
 		p.y*ca - p.z*sa,
 		p.y*sa + p.z*ca
 	);
 }
-Vector3D rotate3D_euler_y(Vector3D &p,double ang)//弧度制
+Vector3D rotate3D_euler_y(Vector3D &p,GEO_FLOAT ang)//弧度制
 {
-	double sa=sin(ang);
-	double ca=cos(ang);
+	GEO_FLOAT sa=sin(ang);
+	GEO_FLOAT ca=cos(ang);
 	return Vector3D(
 		p.x*ca + p.z*sa,
 		p.y,
 		-p.x*sa + p.z*ca
 	);
 }
-Vector3D rotate3D_euler_z(Vector3D &p,double ang)//弧度制
+Vector3D rotate3D_euler_z(Vector3D &p,GEO_FLOAT ang)//弧度制
 {
-	double sa=sin(ang);
-	double ca=cos(ang);
+	GEO_FLOAT sa=sin(ang);
+	GEO_FLOAT ca=cos(ang);
 	return Vector3D(
 		p.x*ca - p.y*sa,
 		p.x*sa + p.y*ca,
@@ -667,12 +667,12 @@ Vector3D rotate3D_euler_z(Vector3D &p,double ang)//弧度制
 //3D旋转:z-x-y内旋 输入点和欧拉角
 Vector3D rotate3D_euler_zxy(Vector3D &p,Vector3D &euler)//弧度制
 {
-	double sx=sin(euler.x);
-	double sy=sin(euler.y);
-	double sz=sin(euler.z);
-	double cx=cos(euler.x);
-	double cy=cos(euler.y);
-	double cz=cos(euler.z);
+	GEO_FLOAT sx=sin(euler.x);
+	GEO_FLOAT sy=sin(euler.y);
+	GEO_FLOAT sz=sin(euler.z);
+	GEO_FLOAT cx=cos(euler.x);
+	GEO_FLOAT cy=cos(euler.y);
+	GEO_FLOAT cz=cos(euler.z);
 	return Vector3D(
 		p.x*(cz*cy-sz*sx*sy	)+p.y*(-sz*cx	)+p.z*(cz*sy+sz*sx*cy	),
 		p.x*(sz*cy+cz*sx*sy	)+p.y*(cx*cz	)+p.z*(sz*sy-cz*sx*cy	),
@@ -688,12 +688,12 @@ Vector3D rotate3D_euler_zxy(Vector3D &&p,Vector3D &euler) { return rotate3D_eule
 //3D旋转:z-y-x内旋(航空欧拉角) 输入点和欧拉角
 Vector3D rotate3D_euler_zyx(Vector3D &p,Vector3D &euler)//弧度制
 {
-	double sx=sin(euler.x);
-	double sy=sin(euler.y);
-	double sz=sin(euler.z);
-	double cx=cos(euler.x);
-	double cy=cos(euler.y);
-	double cz=cos(euler.z);
+	GEO_FLOAT sx=sin(euler.x);
+	GEO_FLOAT sy=sin(euler.y);
+	GEO_FLOAT sz=sin(euler.z);
+	GEO_FLOAT cx=cos(euler.x);
+	GEO_FLOAT cy=cos(euler.y);
+	GEO_FLOAT cz=cos(euler.z);
 	return Vector3D(
 		p.x*(cz*cy	)+p.y*(-sz*cx+cz*sy*sx	)+p.z*(sz*sx+cz*sy*cx	),
 		p.x*(sz*cy	)+p.y*(cx*cz+sz*sy*sx	)+p.z*(-cz*sx+sz*sy*cx	),
@@ -709,12 +709,12 @@ Vector3D rotate3D_euler_zyx(Vector3D &&p,Vector3D &euler) { return rotate3D_eule
 //3D旋转:x-y-z内旋 输入点和欧拉角
 Vector3D rotate3D_euler_yxz(Vector3D &p,Vector3D &euler)//弧度制
 {
-	double sx=sin(euler.x);
-	double sy=sin(euler.y);
-	double sz=sin(euler.z);
-	double cx=cos(euler.x);
-	double cy=cos(euler.y);
-	double cz=cos(euler.z);
+	GEO_FLOAT sx=sin(euler.x);
+	GEO_FLOAT sy=sin(euler.y);
+	GEO_FLOAT sz=sin(euler.z);
+	GEO_FLOAT cx=cos(euler.x);
+	GEO_FLOAT cy=cos(euler.y);
+	GEO_FLOAT cz=cos(euler.z);
 	return Vector3D(
 		p.x*(cy*cz+sx*sy*sz )+p.y*(cz*sy*sx-cy*sz)+p.z*(cx*sy),
 		p.x*(cx*sz			)+p.y*(cx*cz		 )+p.z*(-sx	 ),
@@ -728,9 +728,9 @@ Vector3D rotate3D_euler_yxz(Vector3D &&p,Vector3D &euler) { return rotate3D_eule
 #endif
 
 //四元数的归一化
-double QuatVec::norm(void)
+GEO_FLOAT QuatVec::norm(void)
 {
-	double s=sqrt(w*w+x*x+y*y+z*z);
+	GEO_FLOAT s=sqrt(w*w+x*x+y*y+z*z);
 	w/=s;
 	x/=s;
 	y/=s;
@@ -763,18 +763,18 @@ QuatVec operator*(QuatVec &&q1,QuatVec &q2) { return q1*q2; }
 //四元数旋转,原位操作
 void QuatVec::rot(Vector3D &p)
 {
-	double x2 = x * x;
-	double y2 = y * y;
-	double z2 = z * z;
-	double xy = x * y;
-	double xz = x * z;
-	double yz = y * z;
-	double wx = w * x;
-	double wy = w * y;
-	double wz = w * z;
-	double px=(1-2*(y2+z2)) * p.x + 2*(xy-wz)     * p.y + 2*(xz+wy)     * p.z;
-	double py=2*(xy+wz)     * p.x + (1-2*(x2+z2)) * p.y + 2*(yz-wx)     * p.z;
-	double pz=2*(xz-wy)     * p.x + 2*(yz+wx)     * p.y + (1-2*(x2+y2)) * p.z;
+	GEO_FLOAT x2 = x * x;
+	GEO_FLOAT y2 = y * y;
+	GEO_FLOAT z2 = z * z;
+	GEO_FLOAT xy = x * y;
+	GEO_FLOAT xz = x * z;
+	GEO_FLOAT yz = y * z;
+	GEO_FLOAT wx = w * x;
+	GEO_FLOAT wy = w * y;
+	GEO_FLOAT wz = w * z;
+	GEO_FLOAT px=(1-2*(y2+z2)) * p.x + 2*(xy-wz)     * p.y + 2*(xz+wy)     * p.z;
+	GEO_FLOAT py=2*(xy+wz)     * p.x + (1-2*(x2+z2)) * p.y + 2*(yz-wx)     * p.z;
+	GEO_FLOAT pz=2*(xz-wy)     * p.x + 2*(yz+wx)     * p.y + (1-2*(x2+y2)) * p.z;
 	p.x=px;
 	p.y=py;
 	p.z=pz;
@@ -805,12 +805,12 @@ Vector3D QuatVec::toEuler_yxz(void) //转换为欧拉角，内旋
 }
 void QuatVec::fromEuler_zyx(Vector3D &p) //欧拉角转四元数内旋(航空欧拉角)
 {
-	double cx = cos(p.x/2);
-	double sx = sin(p.x/2);
-	double cy = cos(p.y/2);
-	double sy = sin(p.y/2);
-	double cz = cos(p.z/2);
-	double sz = sin(p.z/2);
+	GEO_FLOAT cx = cos(p.x/2);
+	GEO_FLOAT sx = sin(p.x/2);
+	GEO_FLOAT cy = cos(p.y/2);
+	GEO_FLOAT sy = sin(p.y/2);
+	GEO_FLOAT cz = cos(p.z/2);
+	GEO_FLOAT sz = sin(p.z/2);
 	w = cx * cy * cz + sx * sy * sz;
 	x = sx * cy * cz - cx * sy * sz;
 	y = cx * sy * cz + sx * cy * sz;
@@ -821,12 +821,12 @@ void QuatVec::fromEuler_zyx(Vector3D &&p) { fromEuler_zyx(p); }
 #endif
 void QuatVec::fromEuler_zxy(Vector3D &p) //欧拉角转四元数内旋
 {
-	double cx = cos(p.x/2);
-	double sx = sin(p.x/2);
-	double cy = cos(p.y/2);
-	double sy = sin(p.y/2);
-	double cz = cos(p.z/2);
-	double sz = sin(p.z/2);
+	GEO_FLOAT cx = cos(p.x/2);
+	GEO_FLOAT sx = sin(p.x/2);
+	GEO_FLOAT cy = cos(p.y/2);
+	GEO_FLOAT sy = sin(p.y/2);
+	GEO_FLOAT cz = cos(p.z/2);
+	GEO_FLOAT sz = sin(p.z/2);
 	w = cz * cy * cx - sz * sy * sx;
 	x = cz * sy * cx - sz * cy * sx;
 	y = cz * cy * sx + sz * sy * cx;
@@ -837,12 +837,12 @@ void QuatVec::fromEuler_zxy(Vector3D &&p) { fromEuler_zxy(p); }
 #endif
 void QuatVec::fromEuler_yxz(Vector3D &p) //欧拉角转四元数内旋
 {
-	double cx = cos(p.x/2);
-	double sx = sin(p.x/2);
-	double cy = cos(p.y/2);
-	double sy = sin(p.y/2);
-	double cz = cos(p.z/2);
-	double sz = sin(p.z/2);
+	GEO_FLOAT cx = cos(p.x/2);
+	GEO_FLOAT sx = sin(p.x/2);
+	GEO_FLOAT cy = cos(p.y/2);
+	GEO_FLOAT sy = sin(p.y/2);
+	GEO_FLOAT cz = cos(p.z/2);
+	GEO_FLOAT sz = sin(p.z/2);
 	w = cy * cx * cz + sy * sx * sz;
 	x = cy * sx * cz + sy * cx * sz;
 	y = sy * cx * cz - cy * sx * sz;
@@ -852,7 +852,7 @@ void QuatVec::fromEuler_yxz(Vector3D &p) //欧拉角转四元数内旋
 void QuatVec::fromEuler_yxz(Vector3D &&p) { fromEuler_yxz(p); }
 #endif
 
-void QuatVec::fromAxis(Vector3D &axis,double angle) //从转轴和转角构造
+void QuatVec::fromAxis(Vector3D &axis,GEO_FLOAT angle) //从转轴和转角构造
 {
 	angle/=2;
 	w=cos(angle);
@@ -861,14 +861,14 @@ void QuatVec::fromAxis(Vector3D &axis,double angle) //从转轴和转角构造
 	z=sin(angle)*axis.z;
 }
 #ifdef USECPP11 //4.9.2以上
-void QuatVec::fromAxis(Vector3D &&axis,double angle) { fromAxis(axis,angle); }
+void QuatVec::fromAxis(Vector3D &&axis,GEO_FLOAT angle) { fromAxis(axis,angle); }
 #endif
 
 void QuatVec::fromVector(Vector3D &v) //从向量构造，不完全约束，按直接转过去
 {
 	Vector3D u=Vector3D(1,0,0);
 	u=u^v; //得到直接旋转的轴
-	double a=u.norm()/v.magnitude(); //化为sin值
+	GEO_FLOAT a=u.norm()/v.magnitude(); //化为sin值
 	a=asin(a);
 	fromAxis(u,a);
 }
@@ -953,7 +953,7 @@ Vector3D xyz_2_blh(Vector3D xyz) //输出经纬度高程单位：度、米
 	double z2=xyz.z*xyz.z;
 	Vector3D tmp; //经纬度
 	tmp.x=atan2(xyz.y,xyz.x); //经度没变换，直接求
-	tmp.y=atan2(xyz.z,sqrt(x2+y2)); //纬度先求角度
+	tmp.y=atan2((double)xyz.z,sqrt(x2+y2)); //纬度先求角度
 	tmp.z=sqrt(x2+y2+z2)-EARTH_R;
 	tmp.x=rad2deg(tmp.x);
 	tmp.y=rad2deg(tmp.y);

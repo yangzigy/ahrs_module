@@ -336,7 +336,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>MCU_PROJ, USECPP11,MCU_PROJ</Define>
+              <Define>MCU_PROJ, USECPP11,MCU_PROJ,GEO_FLOAT=float</Define>
               <Undefine></Undefine>
               <IncludePath>.\app;.\hal;.\src;.\sys;..\common</IncludePath>
             </VariousControls>
@@ -496,7 +496,7 @@
                 <FileArmAds>
                   <Cads>
                     <interw>2</interw>
-                    <Optim>0</Optim>
+                    <Optim>4</Optim>
                     <oTime>2</oTime>
                     <SplitLS>2</SplitLS>
                     <OneElfS>2</OneElfS>
@@ -713,7 +713,7 @@
                 <FileArmAds>
                   <Cads>
                     <interw>2</interw>
-                    <Optim>0</Optim>
+                    <Optim>4</Optim>
                     <oTime>2</oTime>
                     <SplitLS>2</SplitLS>
                     <OneElfS>2</OneElfS>
