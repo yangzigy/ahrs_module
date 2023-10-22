@@ -4,7 +4,7 @@
   修改时间：2015年 11月 26日 19:02:19 CST	fb
 版本：	V1.1			2019-01-15
 	
-  功能：
+功能：
 	解析几何库，提供基本计算几何功能。
 	使用C++，不使用STL，若有可能，向单片机\DSP移植
 	基本功能：
@@ -13,7 +13,7 @@
 	3、平移、旋转变换
 	4、相交、其他功能
  
-	使用的方程：
+使用的方程：
 				2D			3D
 	直线方程：y=kx+b	x=Kx*t+X0 |
 						y=Ky*t+Y0 |-> X=Kt+X0
@@ -23,6 +23,18 @@
 	四元数的基本数学方程为:
 	q = cos (a/2) + i(x * sin(a/2)) + j(y * sin(a/2)) + k(z * sin(a/2))
 	其中a表示旋转角度，(x,y,z)表示旋转轴。
+
+除0的避免：
+	总结库中所有的除法：
+	1、Vector的标量除法：		调用方判断
+	2、Vector\QuatVec的norm归一化：		在库中判Eps，失败时不动作，需要外部判断返回的幅度
+	3、Vector的angle夹角：		调用方判断
+	4、Line的Cal_P_Dis直线上距离给定点一定距离的点		调用方保证直线k值非0，否则返回那个点本身
+	5、Line的cross两直线交点：	除零时返回无交点
+	6、Surface::cross线面交点：	除零时返回无交点
+	7、QuatVec::fromVector:		除零时不动作，调用方保证输入非0
+	8、Line3D::line_distance:	使用了norm，要求调用方保证不是平行线
+	9、
 */
 
 #ifndef GEOMETRIC_H
@@ -46,10 +58,10 @@ struct Vector2D
 {
 	GEO_FLOAT x;
 	GEO_FLOAT y;
-	Vector2D(){}
+	Vector2D() { x=0; y=0; }
 	Vector2D(GEO_FLOAT xx,GEO_FLOAT yy)
 	{
-		x=xx;y=yy;
+		x=xx; y=yy;
 	}
 	GEO_FLOAT magnitude(void); //取模
 	GEO_FLOAT norm(void); //对自己进行归一化
@@ -96,10 +108,10 @@ struct Vector3D
 	GEO_FLOAT x;
 	GEO_FLOAT y;
 	GEO_FLOAT z;
-	Vector3D(){}
+	Vector3D() { x=0; y=0; z=0; }
 	Vector3D(GEO_FLOAT xx,GEO_FLOAT yy,GEO_FLOAT zz)
 	{
-		x=xx;y=yy;z=zz;
+		x=xx; y=yy; z=zz;
 	}
 	GEO_FLOAT magnitude(void); //取模
 	GEO_FLOAT norm(void); //对自己进行归一化
@@ -278,15 +290,24 @@ struct QuatVec
 	GEO_FLOAT x;
 	GEO_FLOAT y;
 	GEO_FLOAT z;
+	QuatVec() { w=1; x=0; y=0; z=0; }
+	QuatVec(GEO_FLOAT ww,GEO_FLOAT xx,GEO_FLOAT yy,GEO_FLOAT zz)
+	{
+		w=ww; x=xx; y=yy; z=zz;
+	}
 	GEO_FLOAT norm(void); //对自己进行归一化
 	QuatVec inv(void); //逆，就是共轭，认为自己是单位四元数
 	void rot(Vector3D &p); //旋转一个点
 	Vector3D toEuler_zyx(void); //转换为欧拉角内旋(航空欧拉角)
 	Vector3D toEuler_zxy(void); //转换为欧拉角内旋
 	Vector3D toEuler_yxz(void); //转换为欧拉角内旋
+	Vector3D toEuler_xzy(void); //转换为欧拉角内旋
+	Vector3D toEuler_yzx(void); //转换为欧拉角内旋
 	void fromEuler_zyx(Vector3D &p); //欧拉角转四元数内旋(航空欧拉角)
 	void fromEuler_zxy(Vector3D &p); //欧拉角转四元数内旋
 	void fromEuler_yxz(Vector3D &p); //欧拉角转四元数内旋
+	void fromEuler_xzy(Vector3D &p); //欧拉角转四元数内旋
+	void fromEuler_yzx(Vector3D &p); //欧拉角转四元数内旋
 	void fromAxis(Vector3D &axis,GEO_FLOAT angle); //从转轴和转角构造
 	void fromVector(Vector3D &v); //从向量构造，不完全约束，按直接转过去
 
@@ -294,10 +315,13 @@ struct QuatVec
 	void fromEuler_zyx(Vector3D &&p); //欧拉角转四元数内旋(航空欧拉角)
 	void fromEuler_zxy(Vector3D &&p); //欧拉角转四元数内旋
 	void fromEuler_yxz(Vector3D &&p); //欧拉角转四元数内旋
+	void fromEuler_xzy(Vector3D &&p); //欧拉角转四元数内旋
+	void fromEuler_yzx(Vector3D &&p); //欧拉角转四元数内旋
 	void fromAxis(Vector3D &&axis,GEO_FLOAT angle); //从转轴和转角构造
 	void fromVector(Vector3D &&v); //从向量构造，不完全约束，按直接转过去
 #endif
 };
+const QuatVec QuatVecEmpty(1,0,0,0);
 
 QuatVec operator*(QuatVec &q1,QuatVec &q2); //乘号右侧的先转，恰好与旋转矩阵一样
 
@@ -354,6 +378,14 @@ const double EARTH_R_SHORT=6356752.0; //地球短半轴
 
 #define wgs2xy(x)	((x)*EARTH_R*PI/180) //经纬度转距离
 #define xy2wgs(x)	((x)/EARTH_R/PI*180) //距离转经纬度
+
+//局部直角坐标转经纬度，输入中央经纬线
+Vector3D localxy_2_blh(Vector3D p,Vector3D &cen);//要求外部保证不除0，判断纬度范围
+//经纬度转局部直角坐标，输入中央经纬线
+Vector3D blh_2_localxy(Vector3D p,Vector3D &cen);
+//球面距离
+double EarthDistance(double lng1, double lat1, double lng2, double lat2); //地球两点距离
+double EarthDistance(Vector2D p0, Vector2D p1); //地球两点距离
 
 //经纬度转,B L H->纬度，精度，高度，输入顺序为经纬高
 Vector3D blh_2_xyz_ellipse(Vector3D blh); //椭圆法，输入经纬度高程单位：度、米

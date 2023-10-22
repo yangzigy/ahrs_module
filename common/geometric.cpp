@@ -107,6 +107,7 @@ GEO_FLOAT Vector2D::magnitude(void) //2D向量幅度
 {
 	return sqrt(x*x+y*y);
 }
+//判Eps，失败时不动作，需要外部判断返回的幅度
 GEO_FLOAT Vector2D::norm(void) //2D向量归一化
 {
 	GEO_FLOAT mag=magnitude();
@@ -122,7 +123,7 @@ GEO_FLOAT Vector2D::distance(Vector2D &p1) //2D向量距离
 	Vector2D p=p1-*this;
 	return p.norm();
 }
-
+//调用方判断，若有除0，则导致结果NAN
 GEO_FLOAT Vector2D::angle(Vector2D &p1) //两向量夹角
 {
 	return acos((p1.x*x+p1.y*y)/sqrt(p1.x*p1.x+p1.y*p1.y)/sqrt(x*x+y*y));
@@ -220,6 +221,7 @@ GEO_FLOAT Vector3D::magnitude(void) //3D向量幅度
 {
 	return sqrt(x*x+y*y+z*z);
 }
+//判Eps，失败时不动作，需要外部判断返回的幅度
 GEO_FLOAT Vector3D::norm(void) //3D向量归一化
 {
 	GEO_FLOAT mag=magnitude();
@@ -236,7 +238,7 @@ GEO_FLOAT Vector3D::distance(Vector3D &p1) //3D向量距离
 	Vector3D p=p1-*this;
 	return p.norm();
 }
-
+//调用方判断，若有除0，则导致结果NAN
 GEO_FLOAT Vector3D::angle(Vector3D &p1) //两向量夹角
 {
 	return acos((p1.x*x+p1.y*y+p1.z*z)/sqrt(p1.x*p1.x+p1.y*p1.y+p1.z*p1.z)
@@ -280,7 +282,7 @@ bool Line2D::cross(Line2D &l,Vector2D &p1) //求两直线的交点，false无交
 {
 	GEO_FLOAT t=0; //以解方程的方法来求
 	t=(k.x*l.k.y - k.y*l.k.x); //t1的系数,本身为1
-	if(fabs(t)<0.000001)
+	if(fabs(t)<Eps)
 	{
 		return false;
 	}
@@ -296,7 +298,9 @@ bool Line2D::cross(Line2D &&l,Vector2D &p1)  { return cross(l,p1); }
 Vector2D Line2D::Cal_P_Dis(Vector2D &p1,GEO_FLOAT d) //在直线上，距离给定点一定距离的点。（距离有正负之分）
 {
 	GEO_FLOAT t;
-	t=d/k.magnitude(); //然后得到参数
+	t=k.magnitude();
+	if(t<Eps) { return p1; } //若不符合条件，就返回那个点本身
+	t=d/t; //然后得到参数
 	return k*t+p1;//认为给定点严格在直线上
 }
 #ifdef USECPP11 //4.9.2以上
@@ -308,7 +312,8 @@ Vector2D Line2D::vert_point(Vector2D &p1) //点到直线的垂点
 	Line2D lv;
 	lv=vertical(p1); //求垂线
 	Vector2D p;
-	cross(lv,p); //求交点
+	bool r=cross(lv,p); //求交点
+	if(r==false) { return p1; } //若没有交点，说明交点就是自己
 	return p;
 }
 #ifdef USECPP11 //4.9.2以上
@@ -362,7 +367,7 @@ bool Line3D::cross(Line3D &l,Vector3D &p1) //求两直线的交点(相距最近�
 	{
 		return false;
 	}
-	//解方程
+	//解方程，一定有解，d非0
 	d=	k.x*(l.k.y*kv.z - l.k.z*kv.y) - 
 		k.y*(l.k.x*kv.z - l.k.z*kv.x) + 
 		k.z*(l.k.x*kv.y - l.k.y*kv.x); //行列式值
@@ -384,6 +389,7 @@ bool Line3D::cross(Line3D &l,Vector3D &p1) //求两直线的交点(相距最近�
 bool Line3D::cross(Line3D &&l,Vector3D &p1) { return cross(l,p1); }
 #endif
 
+//此函数要求调用方保证不是平行线
 GEO_FLOAT Line3D::line_distance(Line3D &l) //求两直线间距
 {
 	Vector3D kv;
@@ -399,7 +405,9 @@ GEO_FLOAT Line3D::line_distance(Line3D &&l) { return line_distance(l); }
 Vector3D Line3D::Cal_P_Dis(Vector3D &p1,GEO_FLOAT d) //在直线上，距离给定点一定距离的点。（距离有正负之分）
 {
 	GEO_FLOAT t;
-	t=d/k.magnitude(); //然后得到参数
+	t=k.magnitude();
+	if(t<Eps) { return p1; } //若不符合条件，就返回那个点本身
+	t=d/t; //然后得到参数
 	return k*t+p1;//认为给定点严格在直线上
 }
 #ifdef USECPP11 //4.9.2以上
@@ -475,7 +483,8 @@ Vector3D Surface::vert_point(Vector3D &p1) //点面垂点
 	l.k=k;
 	l.p=p1;
 	Vector3D p;
-	cross(l,p);//垂线与平面的交点
+	bool r=cross(l,p);//垂线与平面的交点
+	if(r==false) { return p1; } //若没有交点，说明交点就是自己
 	return p;
 }
 #ifdef USECPP11 //4.9.2以上
@@ -497,7 +506,7 @@ GEO_FLOAT Surface::distance(Vector3D &&p1) { return distance(p1); }
 Vector2D Segment2D::proj_point(Vector2D &p1) //点到线段距离最短的点（点到线段距离）
 {//线段AB以外P点到AB最短距离的点为C
 	Vector2D unit_ab=end-st; //AB单位向量
-	GEO_FLOAT val_ab=unit_ab.norm();
+	GEO_FLOAT val_ab=unit_ab.norm(); //norm除0时不产生nan，后续运算正常
 	GEO_FLOAT val_ac=(p1-st)*unit_ab; //AP * (AB/abs(AB))
 	if(val_ac>val_ab) return end; //投影点在线段终点B以外
 	if(val_ac<0) return st; //投影点在线段终点B以外
@@ -510,7 +519,7 @@ Vector2D Segment2D::proj_point(Vector2D &&p1) { return proj_point(p1); } //点�
 Vector3D Segment3D::proj_point(Vector3D &p1) //点到线段距离最短的点（点到线段距离）
 {//线段AB以外P点到AB最短距离的点为C
 	Vector3D unit_ab=end-st; //AB单位向量
-	GEO_FLOAT val_ab=unit_ab.norm();
+	GEO_FLOAT val_ab=unit_ab.norm(); //norm除0时不产生nan，后续运算正常
 	GEO_FLOAT val_ac=(p1-st)*unit_ab; //AP * (AB/abs(AB))
 	if(val_ac>val_ab) return end; //投影点在线段终点B以外
 	if(val_ac<0) return st; //投影点在线段终点B以外
@@ -727,14 +736,14 @@ Vector3D rotate3D_euler_yxz(Vector3D &p,Vector3D &&euler) { return rotate3D_eule
 Vector3D rotate3D_euler_yxz(Vector3D &&p,Vector3D &euler) { return rotate3D_euler_yxz(p,euler); }
 #endif
 
-//四元数的归一化
+//四元数的归一化，判Eps，失败时不动作，需要外部判断返回的幅度
 GEO_FLOAT QuatVec::norm(void)
 {
-	GEO_FLOAT s=sqrt(w*w+x*x+y*y+z*z);
-	w/=s;
-	x/=s;
-	y/=s;
-	z/=s;
+	GEO_FLOAT s=sqrt(w*w + x*x + y*y + z*z);
+	if (fabs(s)>Eps)
+	{
+		w/=s; x/=s; y/=s; z/=s;
+	}
 	return s;
 }
 QuatVec QuatVec::inv(void) //逆，就是共轭，认为自己是单位四元数
@@ -803,6 +812,22 @@ Vector3D QuatVec::toEuler_yxz(void) //转换为欧拉角，内旋
 	p.z = atan2(2 * (x * y + w * z) , 1 - 2 * (x * x + z * z));
 	return p;
 }
+Vector3D QuatVec::toEuler_xzy() //转换为欧拉角内旋
+{
+	Vector3D p;
+	p.x = atan2(2 * (y * z + w * x), 1 - 2 * (z * z + x * x));
+	p.y = atan2(2 * (x * z + w * y), 1 - 2 * (y * y + z * z));
+	p.z = -asin(2 * (x * y - w * z));
+	return p;
+}
+Vector3D QuatVec::toEuler_yzx() //转换为欧拉角内旋
+{
+	Vector3D p;
+	p.x = -atan2(2 * (y * z - w * x), 1 - 2 * (z * z + x * x));
+	p.y = -atan2(2 * (x * z - w * y), 1 - 2 * (y * y + z * z));
+	p.z = asin(2 * (x * y + w * z));
+	return p;
+}
 void QuatVec::fromEuler_zyx(Vector3D &p) //欧拉角转四元数内旋(航空欧拉角)
 {
 	GEO_FLOAT cx = cos(p.x/2);
@@ -851,6 +876,38 @@ void QuatVec::fromEuler_yxz(Vector3D &p) //欧拉角转四元数内旋
 #ifdef USECPP11 //4.9.2以上
 void QuatVec::fromEuler_yxz(Vector3D &&p) { fromEuler_yxz(p); }
 #endif
+void QuatVec::fromEuler_xzy(Vector3D &p) //欧拉角转四元数内旋
+{
+	double cx = cos(p.x / 2);
+	double sx = sin(p.x / 2);
+	double cy = cos(p.y / 2);
+	double sy = sin(p.y / 2);
+	double cz = cos(p.z / 2);
+	double sz = sin(p.z / 2);
+	w = cx * cz * cy + sx * sz * sy;
+	x = cy * sx * cz - sy * cx * sz;
+	y = sy * cx * cz - cy * sx * sz;
+	z = cy * cx * sz + sy * sx * cz;
+}
+#ifdef USECPP11 //4.9.2以上
+void QuatVec::fromEuler_xzy(Vector3D &&p) { fromEuler_yxz(p); }
+#endif
+void QuatVec::fromEuler_yzx(Vector3D &p) //欧拉角转四元数内旋
+{
+	double cx = cos(p.x / 2);
+	double sx = sin(p.x / 2);
+	double cy = cos(p.y / 2);
+	double sy = sin(p.y / 2);
+	double cz = cos(p.z / 2);
+	double sz = sin(p.z / 2);
+	w = cx * cz * cy - sx * sz * sy;
+	x = cy * sx * cz + sy * cx * sz;
+	y = sy * cx * cz + cy * sx * sz;
+	z = cy * cx * sz - sy * sx * cz;
+}
+#ifdef USECPP11 //4.9.2以上
+void QuatVec::fromEuler_yzx(Vector3D &&p) { fromEuler_yxz(p); }
+#endif
 
 void QuatVec::fromAxis(Vector3D &axis,GEO_FLOAT angle) //从转轴和转角构造
 {
@@ -867,8 +924,10 @@ void QuatVec::fromAxis(Vector3D &&axis,GEO_FLOAT angle) { fromAxis(axis,angle); 
 void QuatVec::fromVector(Vector3D &v) //从向量构造，不完全约束，按直接转过去
 {
 	Vector3D u=Vector3D(1,0,0);
+	GEO_FLOAT vm=v.magnitude();
+	if(vm < Eps) return ; //若除零，不动作
 	u=u^v; //得到直接旋转的轴
-	GEO_FLOAT a=u.norm()/v.magnitude(); //化为sin值
+	GEO_FLOAT a=u.norm()/vm; //化为sin值，u为0没关系
 	a=asin(a);
 	fromAxis(u,a);
 }
@@ -887,6 +946,38 @@ QuatVec change_coord(QuatVec &u,QuatVec &coord) //输入载荷姿态、载体姿
 ////////////////////////////////////////////////////////////////
 //地理算法
 ////////////////////////////////////////////////////////////////
+//局部直角坐标转经纬度，高程不动。输入中央经纬线
+Vector3D localxy_2_blh(Vector3D p,Vector3D &cen) //要求外部保证不除0，判断纬度范围
+{
+	p.x=xy2wgs(p.x);
+	p.y=xy2wgs(p.y) + cen.y;
+	p.x=cen.x + p.x/cos(deg2rad(p.y)); //桑逊投影
+	return p;
+}
+//经纬度转局部直角坐标，高程不动。输入中央经纬线
+Vector3D blh_2_localxy(Vector3D p,Vector3D &cen)
+{
+	p.x-=cen.x;
+	p.x=wgs2xy(p.x)*cos(deg2rad(p.y)); //桑逊投影
+	p.y-=cen.y;
+	p.y=wgs2xy(p.y);
+	return p;
+}
+double EarthDistance(double lng1, double lat1, double lng2, double lat2) //地球两点距离
+{
+	double radLat1 = deg2rad(lat1);
+	double radLat2 = deg2rad(lat2);
+	double a = radLat1 - radLat2;
+	double b = deg2rad(lng1) - deg2rad(lng2);
+	double s = 2 * asin(sqrt(pow(sin(a / 2), 2) +
+		cos(radLat1) * cos(radLat2) * pow(sin(b / 2), 2)));
+	s = s * EARTH_R;
+	return s;
+}
+double EarthDistance(Vector2D p0, Vector2D p1) //地球两点距离
+{
+	return EarthDistance(p0.x, p0.y, p1.x, p1.y);
+}
 //经纬度转,B L H->纬度，精度，高度，输入顺序为经纬高
 Vector3D blh_2_xyz_ellipse(Vector3D blh) //椭圆法，输入经纬度高程单位：度、米
 {
@@ -923,8 +1014,8 @@ Vector3D xyz_2_blh_ellipse(Vector3D xyz) //椭圆法，输出经纬度高程单�
 	tmp.y=atan2(xyz.z+EARTH_R_SHORT*e12*sintheata*sintheata*sintheata,
 				sqrt_x2_y2-EARTH_R*e2*costheata*costheata*costheata);
 	double sinB=sin(tmp.y);
-	double n=EARTH_R/sqrt(1-(e2*sinB*sinB));
-	tmp.z=sqrt_x2_y2/cos(tmp.y)-n;
+	double n=EARTH_R/sqrt(1-(e2*sinB*sinB)); //一定非0
+	tmp.z=sqrt_x2_y2/cos(tmp.y)-n; //前边atan2里边不出INF，这里就不会是0
 	tmp.x=rad2deg(tmp.x);
 	tmp.y=rad2deg(tmp.y);
 	return tmp; //算法未完成
