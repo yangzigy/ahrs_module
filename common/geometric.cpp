@@ -852,10 +852,10 @@ void QuatVec::fromEuler_zxy(Vector3D &p) //欧拉角转四元数内旋
 	GEO_FLOAT sy = sin(p.y/2);
 	GEO_FLOAT cz = cos(p.z/2);
 	GEO_FLOAT sz = sin(p.z/2);
-	w = cz * cy * cx - sz * sy * sx;
-	x = cz * sy * cx - sz * cy * sx;
-	y = cz * cy * sx + sz * sy * cx;
-	z = cz * sy * sx + sz * cy * cx;
+	w = cz * cx * cy - sz * sx * sy;
+	x = cz * sx * cy - sz * cx * sy;
+	y = sz * sx * cy + cz * cx * sy;
+	z = sz * cx * cy + cz * sx * sy;
 }
 #ifdef USECPP11 //4.9.2以上
 void QuatVec::fromEuler_zxy(Vector3D &&p) { fromEuler_zxy(p); }
@@ -878,12 +878,12 @@ void QuatVec::fromEuler_yxz(Vector3D &&p) { fromEuler_yxz(p); }
 #endif
 void QuatVec::fromEuler_xzy(Vector3D &p) //欧拉角转四元数内旋
 {
-	double cx = cos(p.x / 2);
-	double sx = sin(p.x / 2);
-	double cy = cos(p.y / 2);
-	double sy = sin(p.y / 2);
-	double cz = cos(p.z / 2);
-	double sz = sin(p.z / 2);
+	GEO_FLOAT cx = cos(p.x / 2);
+	GEO_FLOAT sx = sin(p.x / 2);
+	GEO_FLOAT cy = cos(p.y / 2);
+	GEO_FLOAT sy = sin(p.y / 2);
+	GEO_FLOAT cz = cos(p.z / 2);
+	GEO_FLOAT sz = sin(p.z / 2);
 	w = cx * cz * cy + sx * sz * sy;
 	x = cy * sx * cz - sy * cx * sz;
 	y = sy * cx * cz - cy * sx * sz;
@@ -894,12 +894,12 @@ void QuatVec::fromEuler_xzy(Vector3D &&p) { fromEuler_yxz(p); }
 #endif
 void QuatVec::fromEuler_yzx(Vector3D &p) //欧拉角转四元数内旋
 {
-	double cx = cos(p.x / 2);
-	double sx = sin(p.x / 2);
-	double cy = cos(p.y / 2);
-	double sy = sin(p.y / 2);
-	double cz = cos(p.z / 2);
-	double sz = sin(p.z / 2);
+	GEO_FLOAT cx = cos(p.x / 2);
+	GEO_FLOAT sx = sin(p.x / 2);
+	GEO_FLOAT cy = cos(p.y / 2);
+	GEO_FLOAT sy = sin(p.y / 2);
+	GEO_FLOAT cz = cos(p.z / 2);
+	GEO_FLOAT sz = sin(p.z / 2);
 	w = cx * cz * cy - sx * sz * sy;
 	x = cy * sx * cz + sy * cx * sz;
 	y = sy * cx * cz + cy * sx * sz;
